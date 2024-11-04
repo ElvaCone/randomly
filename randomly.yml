@@ -1,0 +1,38 @@
+name: Daily Random Commits
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+    - cron: '0 8 * * *'
+    - cron: '0 16 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  random-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Randomly commit 8 times in a run
+        run: |
+          for i in {1..8}
+          do
+            sleep $(( RANDOM % 1800 ))
+            echo "$(date)" >> daily_commit.txt
+
+            # 配置为您的 GitHub 用户身份
+            git config --local user.name "ElvaCone"
+            git config --local user.email "173384004+ElvaCone@users.noreply.github.com"
+            git add .
+            git commit -m "Random commit #$i $(date)"
+          done
+
+      - name: Push changes
+        env:
+          TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+        run: |
+          git remote set-url origin https://$TOKEN@github.com/${{ github.repository }}
+          git push
